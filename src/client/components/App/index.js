@@ -6,17 +6,29 @@ const hasGetUserMedia = () =>
 const DeviceList = props => {
   return (
     <ul>
-      {props.devices.map(device => (
-        <li key={device.id}>{JSON.stringify(device, null, 2)}</li>
-      ))}
+      {props.devices.map(device => {
+        let [kind, type, direction] = device.kind.match(/(\w+)(input|output)/i);
+        return (
+          <li key={device.id}>
+            <strong>
+              {device.label} ({direction} | {kind})
+            </strong>
+          </li>
+        );
+      })}
     </ul>
   );
 };
 
 const getDevices = ctx =>
-  navigator.mediaDevices
-    .enumerateDevices()
-    .then(devices => ctx.setState({ devices }));
+  navigator.getUserMedia(
+    { audio: true, video: true },
+    () =>
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then(devices => ctx.setState({ devices })),
+    console.error
+  );
 
 export default class App extends React.Component {
   constructor(props) {
